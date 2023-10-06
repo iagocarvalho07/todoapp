@@ -50,6 +50,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _showChart = false;
   final List<Transaction> _transation = [];
 
   List<Transaction> get _recentTransactions {
@@ -89,23 +90,62 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isLandsCap =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final appbar = AppBar(
+      title: const Text(
+        "Despesas Pessoais",
+        strutStyle: StrutStyle(fontWeight: FontWeight.bold),
+      ),
+      actions: <Widget>[
+        IconButton(
+            onPressed: () {
+              setState(() {
+                _showChart = !_showChart;
+              });
+            },
+            icon: Icon(_showChart ? Icons.list : Icons.bar_chart)),
+        IconButton(
+            onPressed: () => _openTransationForm(context),
+            icon: Icon(Icons.add)),
+      ],
+    );
+
+    final availabelHeight = MediaQuery.of(context).size.height -
+        appbar.preferredSize.height -
+        MediaQuery.of(context).padding.top;
+
     return Scaffold(
-      appBar: AppBar(
-          title: const Text(
-            "Despesas Pessoais",
-            strutStyle: StrutStyle(fontWeight: FontWeight.bold),
-          ),
-          actions: <Widget>[
-            IconButton(
-                onPressed: () => _openTransationForm(context),
-                icon: Icon(Icons.add)),
-          ]),
+      appBar: appbar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Chart(_recentTransactions),
-            TransactionList(_transation, _deleteTransation),
+            // if (isLandsCap)
+            //   Row(
+            //     children: [
+            //       const Text('Exibir Gráfico'),
+            //       Switch(
+            //         value: _showChart,
+            //         onChanged: (value) {
+            //           setState(() {
+            //             _showChart = value;
+            //           });
+            //         },
+            //       ),
+            //     ],
+            //   ),
+            if (_showChart || !isLandsCap)
+              SizedBox(
+                height: availabelHeight * (isLandsCap ? 0.7 : 0.3),
+                child: Chart(_recentTransactions),
+              ),
+            if (!_showChart || !isLandsCap)
+              SizedBox(
+                height: availabelHeight * 0.6,
+                child: TransactionList(_transation, _deleteTransation),
+              ),
           ],
         ),
       ),
